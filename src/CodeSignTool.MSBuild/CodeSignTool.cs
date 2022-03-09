@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using System.IO;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Ancora.MSBuild
@@ -13,12 +11,12 @@ namespace Ancora.MSBuild
 	/// </summary>
 	public class CodeSignTool : ContextAwareTask
 	{
-		const string Censored = "********";
+		readonly static string Censored = "********";
 
 #if NETCOREAPP
 		readonly static string JavaExecutable = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) ? "java.exe" : "java";
 #else
-		const string JavaExecutable = "java.exe";
+		readonly static string JavaExecutable = "java.exe";
 #endif
 
 		/// <summary>
@@ -67,26 +65,29 @@ namespace Ancora.MSBuild
 		/// </summary>
 		public int TimeoutMilliseconds { get; set; } = 10000;
 
+		/// <summary>
+		/// Gets or sets a value indicating if an error should occur if the set of files to be signed is empty.
+		/// </summary>
 		public bool ErrorOnNoFiles { get; set; } = false;
 
 		protected override bool ExecuteInner()
 		{
-			if (SignFiles?.Any() != true)
-			{
-				if (ErrorOnNoFiles)
-				{
-					LogCensoredError("No files specified to sign.");
-					return false;
-				} 
-				else
-				{
-					LogCensoredMessage("No files specified to sign.");
-					return true;
-				}
-			}
-
 			try 
 			{
+				if (SignFiles?.Any() != true)
+				{
+					if (ErrorOnNoFiles)
+					{
+						LogCensoredError("No files specified to sign.");
+						return false;
+					}
+					else
+					{
+						LogCensoredMessage("No files specified to sign.");
+						return true;
+					}
+				}
+
 				var javaPath = FindJava();
 
 				var timestamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
@@ -136,7 +137,8 @@ namespace Ancora.MSBuild
 
 			var javaParams = $"-cp \"{classPath}\" com.ssl.code.signing.tool.CodeSignTool";
 			javaParams += " sign";
-			javaParams += $" -username=\"{Username}\" -password=\"{Password}\"";
+			javaParams += $" -username=\"{Username}\"";
+			javaParams += $" -password=\"{Password}\"";
 			javaParams += $" -input_file_path=\"{filePath}\"";
 			javaParams += $" -output_dir_path=\"{outputDirectory}\"";
 
@@ -169,7 +171,6 @@ namespace Ancora.MSBuild
 
 				// some errors are written to stdout instead of stderr.
 				bool errorOutput = false;
-				
 				proc.ErrorDataReceived += (sender, e) =>
 				{
 					if (e.Data != null)
@@ -183,6 +184,7 @@ namespace Ancora.MSBuild
 				{
 					if (e.Data != null)
 					{
+						// at least one error has been observed written to stdout with an "Error:" prefix.
 						if (e.Data.Contains("Error:"))
 						{
 							LogCensoredError(e.Data);
@@ -194,11 +196,13 @@ namespace Ancora.MSBuild
 						}
 					}
 				};
+
 				proc.Start();
 
 				proc.BeginOutputReadLine();
 				proc.BeginErrorReadLine();
 
+				// Kill the process if the timeout period is exceeded.
 				if(!proc.WaitForExit(TimeoutMilliseconds))
 				{
 					LogCensoredError("CodeSignTool did not exit in before {0} millisecond timeout.", TimeoutMilliseconds);
@@ -206,6 +210,7 @@ namespace Ancora.MSBuild
 					return false;
 				}
 				
+				// Fail if non-zero exit code or error output was written.
 				var error = proc.ExitCode != 0 || errorOutput;
 				if (error)
 				{
