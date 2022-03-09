@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Ancora.CodeSignTool.MSBuild$LKGSuffix$</id>
+    <version>$version$</version>
+    <title>Ancora.CodeSignTool.MSBuild</title>
+    <authors>Ancora Software, Inc.</authors>
+    <owners>>Ancora Software, Inc.</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>true</developmentDependency>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/ancorasoftware/CodeSignTool</projectUrl>
+    <description>Code signs files using SSL.com's eSigner CodeSignTool utiliy.</description>
+    <tags>codesign SignTool CodeSignTool eSigner SSL.com</tags>
+    <repository type="git" url="https://github.com/ancorasoftware/CodeSignTool.git" commit="$commit$" />
+  </metadata>
+  <files>
+    <file src="content\**\*" target="content\" />
+
+    <file src="$BaseOutputPath$net461\Ancora.CodeSignTool.MSBuild.dll" target="build\MSBuildFull\Ancora.CodeSignTool.MSBuild.dll" />
+
+    <file src="$BaseOutputPath$netcoreapp3.1\Ancora.CodeSignTool.MSBuild.dll" target="build\MSBuildCore\Ancora.CodeSignTool.MSBuild.dll" />
+
+    <file src="build\Ancora.CodeSignTool.MSBuild.targets" target="build\Ancora.CodeSignTool.MSBuild$LKGSuffix$.targets" />
+    <file src="build\Ancora.CodeSignTool.MSBuild.Common.targets" target="build\Ancora.CodeSignTool.MSBuild.Common$LKGSuffix$.targets" />
+      
+      <!-- 
+    <file src="build\InProjectVersionComputation.targets" target="build\InProjectVersionComputation.targets" />
+    <file src="build\MSBuildTargetCaching.targets" target="build\MSBuildTargetCaching.targets" />
+    <file src="build\CodeSignTool.MSBuild.Common.targets" target="build\CodeSignTool.MSBuild.Common.targets" />
+    <file src="build\CodeSignTool.MSBuild.Inner.targets" target="build\CodeSignTool.MSBuild.Inner.targets" />
+
+    <file src="build\PrivateP2PCaching.proj" target="build\PrivateP2PCaching.proj" />
+    <file src="buildCrossTargeting\CodeSignTool.MSBuild.targets" target="buildCrossTargeting\CodeSignTool.MSBuild$LKGSuffix$.targets" />
+    <file src="readme.txt" target="readme.txt" />
+    -->
+
+    <file src="buildCrossTargeting\Ancora.CodeSignTool.MSBuild.targets" target="buildCrossTargeting\Ancora.CodeSignTool.MSBuild$LKGSuffix$.targets" />
+  </files>
+</package>

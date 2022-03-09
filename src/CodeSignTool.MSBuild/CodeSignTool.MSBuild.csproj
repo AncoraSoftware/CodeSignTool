@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>Ancora.CodeSignTool.MSBuild</AssemblyName>
+        
+        <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
+
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        
+        <NuSpecFile>Ancora.CodeSignTool.MSBuild.nuspec</NuSpecFile>
+
+        <NoPackageAnalysis>true</NoPackageAnalysis>
+
+        <!-- Note that https://github.com/NuGet/Home/issues/4694 prevents this from actually working. -->
+        <developmentDependency>true</developmentDependency>
+
+        <!-- We're going to include it by virtue of sending the whole bin dir to the build folder. -->
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        
+        <LangVersion>9.0</LangVersion>
+    </PropertyGroup>
+
+
+    <Target Name="SetNuSpecProperties" BeforeTargets="GenerateNuspec">
+        <PropertyGroup>
+            <LibGit2SharpNativeBinaries>$(NuGetPackageRoot)libgit2sharp.nativebinaries\$(LibGit2SharpNativeVersion)\</LibGit2SharpNativeBinaries>
+            <NuspecProperties>$(NuspecProperties);Version=$(Version);BaseOutputPath=$(OutputPath)</NuspecProperties>
+            <NuspecProperties Condition=" '$(PackLKG)' == 'true' ">$(NuspecProperties);LKGSuffix=.LKG</NuspecProperties>
+        </PropertyGroup>
+    </Target>
+    
+    <Target Name="PackBuildOutputs" DependsOnTargets="SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup">
+        <PropertyGroup>
+            <BuildSubDir Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">MSBuildCore\</BuildSubDir>
+            <BuildSubDir Condition=" '$(TargetFramework)' == 'net461' ">MSBuildFull\</BuildSubDir>
+        </PropertyGroup>
+        <Error Text="Unrecognized TargetFramework" Condition=" '$(BuildSubDir)' == '' " />
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="
+                        $(OutputPath)CodeSignTool.MSBuild.dll*;
+               ">
+                <PackagePath>build\$(BuildSubDir)</PackagePath>
+            </TfmSpecificPackageFile>
+            <!-- Package up the CodeSignTool package files. -->
+            <TfmSpecificPackageFile Include="@(ContentWithTargetPath)" Condition=" '%(ContentWithTargetPath.CopyToOutputDirectory)' == 'PreserveNewest' ">
+                <PackagePath>build\$(BuildSubDir)%(ContentWithTargetPath.TargetPath)</PackagePath>
+            </TfmSpecificPackageFile>
+        </ItemGroup>
+    </Target>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net461' ">
+        <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.9.20" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+        <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.9.20" />
+        <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    </ItemGroup>
+
+</Project>

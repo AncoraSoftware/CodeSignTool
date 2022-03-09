@@ -1,0 +1,55 @@
+<Project TreatAsLocalProperty="RepoRoot">
+	<!-- Set these properties early enough for libraries. -->
+	<PropertyGroup>
+		<RepoRoot>$([MSBuild]::EnsureTrailingSlash('$(MSBuildThisFileDirectory)'))</RepoRoot>
+	</PropertyGroup>
+
+	<!-- Dependency versions -->
+	<PropertyGroup>
+        <NerdbankGitVersioningVersion>3.4.255</NerdbankGitVersioningVersion>
+    </PropertyGroup>
+
+    <!-- Branding -->
+    <PropertyGroup>
+        <Company>Ancora Software, Inc.</Company>
+        <CopyrightYear Condition=" '$(CopyrightYear)' == '' ">$([System.DateTime]::Now.ToString("yyyy"))</CopyrightYear>
+        <Copyright Condition=" '$(Copyright)' == '' ">Copyright © $(Company) $(CopyrightYear)</Copyright>
+    </PropertyGroup>
+
+    <!-- Nuget settings -->
+	<PropertyGroup>
+		<!-- Disable warning that we are using SemVer 2.0 verisioning -->
+		<NoWarn>$(NoWarn);NU5105</NoWarn>
+		<MinClientVersion>4.3</MinClientVersion>
+        <!-- Support nuget caching 
+             see: https://devblogs.microsoft.com/nuget/enable-repeatable-package-restores-using-a-lock-file/ -->
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+	</PropertyGroup>
+
+	<!-- Define test projects and companions -->
+	<PropertyGroup>
+		<IsTestProject>false</IsTestProject>
+		<IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests')) or $(MSBuildProjectName.EndsWith('Tests'))">true</IsTestProject>
+
+		<IsTestSupportProject>false</IsTestSupportProject>
+		<IsTestSupportProject Condition="($(MSBuildProjectFullPath.Contains('\tests\')) or $(MSBuildProjectFullPath.Contains('/tests/'))) and '$(IsTestProject)' != 'true'">true</IsTestSupportProject>
+
+		<!-- Treat test assemblies as non-shipping (do not publish or sign them). -->
+		<IsShipping Condition="'$(IsTestProject)' == 'true' or '$(IsTestSupportProject)' == 'true'">false</IsShipping>
+	</PropertyGroup>
+
+	<!-- Test environment -->
+	<PropertyGroup Condition="$(IsTestProject) == 'true'">
+		<IsPackable>false</IsPackable>
+		<IsPublishable>false</IsPublishable>
+	</PropertyGroup>
+    
+    <!-- Common dependencies -->
+    <ItemGroup>
+        <PackageReference Include="Nerdbank.GitVersioning" Version="$(NerdbankGitVersioningVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    
+</Project>

@@ -1,0 +1,5 @@
+v1.2.2
+
+- Log4j version upgraded to 2.17.1.
+- New sign_hash command addded for signing the hash values.
+- New get_certs command added for retrieving certificate chain from cloud signatures service.

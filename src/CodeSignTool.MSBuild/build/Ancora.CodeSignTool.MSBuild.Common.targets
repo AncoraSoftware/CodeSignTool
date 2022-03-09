@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_ACST_Common_Targets_Imported>true</_ACST_Common_Targets_Imported>
+    <_ACST_PlatformSuffix Condition=" '$(_ACST_PlatformSuffix)' == '' and '$(MSBuildRuntimeType)' == 'Core' ">MSBuildCore/</_ACST_PlatformSuffix>
+    <_ACST_PlatformSuffix Condition=" '$(_ACST_PlatformSuffix)' == '' ">MSBuildFull/</_ACST_PlatformSuffix>
+    <AncoraCodeSignToolMSBuildPath Condition=" '$(AncoraCodeSignToolMSBuildPath)' == '' ">$(MSBuildThisFileDirectory)$(_ACST_PlatformSuffix)</AncoraCodeSignToolMSBuildPath>
+  </PropertyGroup>
+</Project>
